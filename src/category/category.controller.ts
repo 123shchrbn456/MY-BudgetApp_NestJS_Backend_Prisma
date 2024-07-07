@@ -1,20 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UsePipes, HttpCode } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Prisma } from '@prisma/client';
+import { CurrentUser } from '../auth/decorator/user.decorator';
+import { Auth } from '../auth/decorator/auth.decorator';
 
 @Controller('category')
 export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
+    @UsePipes(new ValidationPipe())
+    @HttpCode(200)
     @Post()
-    create(@Body() dto: Prisma.CategoryCreateInput) {
-        return this.categoryService.create(dto);
+    @Auth()
+    create(@Body() dto: Prisma.CategoryCreateInput, @CurrentUser('id') userId: string) {
+        return this.categoryService.create(dto, userId);
     }
 
     @Get()
-    findAll() {
-        return this.categoryService.findAll();
+    @Auth()
+    findAll(@CurrentUser('id') userId: string) {
+        return this.categoryService.findAll(userId);
     }
 
     @Get(':id')

@@ -1,21 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UsePipes, HttpCode } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Prisma } from '@prisma/client';
+import { CurrentUser } from '../auth/decorator/user.decorator';
+import { Auth } from '../auth/decorator/auth.decorator';
 
 @Controller('transaction')
 export class TransactionController {
     constructor(private readonly transactionService: TransactionService) {}
 
+    @UsePipes(new ValidationPipe())
+    @HttpCode(200)
     @Post()
-    create(@Body() dto: Prisma.TransactionCreateInput) {
-        return this.transactionService.create(dto);
+    @Auth()
+    create(@Body() dto: Prisma.TransactionCreateInput, @CurrentUser('id') userId: string) {
+        return this.transactionService.create(dto, userId);
     }
 
     @Get()
-    findAll() {
-        return this.transactionService.findAll();
+    @Auth()
+    findAll(@CurrentUser('id') userId: string) {
+        return this.transactionService.findAll(userId);
     }
 
     @Get(':id')

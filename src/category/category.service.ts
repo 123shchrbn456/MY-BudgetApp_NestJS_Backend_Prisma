@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -7,12 +6,15 @@ import { Prisma } from '@prisma/client';
 export class CategoryService {
     constructor(private prisma: PrismaService) {}
 
-    create(dto: Prisma.CategoryCreateInput) {
-        return this.prisma.category.create({ data: { ...dto, user: { connect: { id: +dto.user } } } });
+    create(dto: Prisma.CategoryCreateInput, userId: string) {
+        return this.prisma.category.create({ data: { ...dto, user: { connect: { id: +userId } } } });
     }
 
-    findAll() {
+    findAll(userId: string) {
         return this.prisma.category.findMany({
+            where: {
+                user_id: +userId,
+            },
             include: {
                 user: true,
             },

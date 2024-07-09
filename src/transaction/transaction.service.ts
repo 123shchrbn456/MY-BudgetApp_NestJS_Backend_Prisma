@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -25,15 +24,42 @@ export class TransactionService {
         });
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} transaction`;
+    async findOne(id: number) {
+        const transaction = await this.prisma.transaction.findUnique({
+            where: {
+                id: +id,
+            },
+        });
+
+        if (!transaction) throw new NotFoundException('Transaction is not found!');
+
+        return transaction;
     }
 
-    update(id: number, updateTransactionDto: UpdateTransactionDto) {
-        return `This action updates a #${id} transaction`;
+    async update(id: string, updateDto: Prisma.TransactionUpdateInput) {
+        const transaction = await this.findOne(+id);
+
+        if (!transaction) throw new NotFoundException('Transaction not found');
+
+        return this.prisma.transaction.update({
+            where: { id: transaction.id },
+            data: updateDto,
+        });
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} transaction`;
+    async remove(id: string) {
+        const transaction = await this.findOne(+id);
+
+        if (!transaction) throw new NotFoundException('Transaction not found');
+
+        return this.prisma.transaction.delete({
+            where: {
+                id: +id,
+            },
+        });
     }
+
+    async findAllWithPagination() {}
+
+    async findAllByType() {}
 }

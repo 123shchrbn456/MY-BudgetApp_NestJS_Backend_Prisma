@@ -26,6 +26,9 @@ export class CategoryService {
             where: {
                 id: +id,
             },
+            include: {
+                user: true,
+            },
         });
 
         if (!category) throw new NotFoundException('Category is not found!');
@@ -42,7 +45,9 @@ export class CategoryService {
         });
     }
 
-    remove(id: string) {
+    async remove(id: string) {
+        const category = await this.findOne(+id);
+
         return this.prisma.category.delete({
             where: {
                 id: +id,

@@ -22,17 +22,20 @@ export class CategoryController {
         return this.categoryService.findAll(userId);
     }
 
-    @Get(':id')
+    @Get(':type/:id')
+    @Auth()
     findOne(@Param('id') id: string) {
         return this.categoryService.findOne(+id);
     }
 
-    @Patch(':id')
+    @Patch(':type/:id')
+    @Auth()
     update(@Param('id') id: string, @Body() updateDto: Prisma.CategoryUpdateInput) {
         return this.categoryService.update(id, updateDto);
     }
 
-    @Delete(':id')
+    @Delete(':type/:id')
+    @Auth()
     remove(@Param('id') id: string) {
         return this.categoryService.remove(id);
     }
